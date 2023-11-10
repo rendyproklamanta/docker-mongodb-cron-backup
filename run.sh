@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Set the timezone
+ln -sf /usr/share/zoneinfo/$TZ /etc/localtime
+
 touch /backup.log
 tail -F /backup.log &
 env > /.env
@@ -23,8 +27,10 @@ CRONENV=/env.sh
 if [ ! -f $CRONJOB ]
 then
   echo "=> Installing cron job in $CRONJOB ..."
+  echo "export TZ=$TZ" > $CRONENV
   echo "export MONGO_HOST=$MONGO_HOST" > $CRONENV
   echo "export MONGO_PORT=$MONGO_PORT" >> $CRONENV
+  echo "export MONGO_DB=$MONGO_DB" >> $CRONENV
   echo "export MONGO_USER=$MONGO_USER" >> $CRONENV
   echo "export MONGO_PASS=$MONGO_PASS" >> $CRONENV
   echo "export MAX_BACKUPS=$MAX_BACKUPS" >> $CRONENV

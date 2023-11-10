@@ -2,7 +2,7 @@
 source /env.sh
 OPTS="--gzip"
 DATE=$(date +%Y.%m.%d.%H.%M)
-OUTPUT=/backup/$MONGO_HOST-$DATE.archive.gz
+OUTPUT=/backup/${MONGO_DB:-all}-$DATE.gz
 
 if [ ! -z "$MONGO_USER" ]
 then
@@ -20,13 +20,13 @@ then
 fi
 
 echo "=> Backup started at $DATE"
-mongodump --forceTableScan $OPTS --host "$MONGO_HOST" --port "$MONGO_PORT" --archive="$OUTPUT"
+mongodump --forceTableScan $OPTS --host "$MONGO_HOST" --port "$MONGO_PORT" --authenticationDatabase admin --archive="$OUTPUT"
 
 if [ -n "$MAX_BACKUPS" ]; then
-  while [ "$(find /backup -maxdepth 1 | wc -l)" -gt "$MAX_BACKUPS" ]
+  while [ "$(find /backup -maxdepth 1 -type f | wc -l)" -gt "$MAX_BACKUPS" ]
   do
-    TARGET=$(find /backup -maxdepth 1 | sort | head -n 1)
-    rm -rf "$TARGET"
+    TARGET=$(ls -t /backup | tail -n 1)
+    rm -rf "/backup/$TARGET"
     echo "Backup $TARGET is deleted"
   done
 fi
